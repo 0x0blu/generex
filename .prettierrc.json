@@ -1,0 +1,7 @@
+{
+	"arrowParens": "avoid",
+	"editorconfig": true,
+	"plugins": ["prettier-plugin-organize-imports"],
+	"printWidth": 120,
+	"trailingComma": "all"
+}
