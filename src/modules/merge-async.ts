@@ -1,7 +1,5 @@
 import type { AG } from "../types/generator";
 
-const neverFulfillingPromise = new Promise<never>(() => null);
-
 export default function mergeAsync<T, TReturn>(...generators: AG<T, TReturn>[]): AG<T, TReturn[]> {
 	let remaining = generators.length;
 
@@ -13,7 +11,7 @@ export default function mergeAsync<T, TReturn>(...generators: AG<T, TReturn>[]):
 		if (result.done) {
 			remaining -= 1;
 
-			if (remaining) return neverFulfillingPromise;
+			if (remaining) return new Promise<never>(() => null); // never fulfilling promise
 
 			return () => ({ done: true, value: results });
 		}
