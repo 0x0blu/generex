@@ -1,0 +1,29 @@
+#!/usr/bin/env node
+import fs from 'fs';
+import { basename, resolve } from 'path';
+
+const { argv } = process;
+
+if (argv.length != 3) {
+  console.error(`Usage: ${basename(process.argv[1])} <module>`);
+  process.exit(1);
+}
+
+const moduleName = argv[2];
+const modulePath = resolve(import.meta.filename, `../../src/${moduleName}.ts`);
+
+const moduleFunctionName = moduleName.split('/').pop();
+
+const syncModulePath = resolve(import.meta.filename, `../../src/${moduleName}Sync.ts`);
+const moduleSource = fs.readFileSync(modulePath, 'utf8');
+
+let syncModuleSource = moduleSource
+  .replace(new RegExp(`\\bfunction(\\*?) ${moduleFunctionName}`, 'g'), `function$1 ${moduleFunctionName}Sync`)
+  .replace(/\basync /g, '')
+  .replace(/\bawait /g, '')
+  .replace(/\b(\w+): \1\b/g, '$1')
+  .replace(/\b(Async|Any)(Generator|Iterator|Iterable)</g, '$2<')
+  .replace(/Promise(Or)?<([^<>]+(<[^<>]+>)?)>/g, '$2')
+  .replace(/Promise\.(all|allSettled|race)\((([^\(\)]*(\(([^\(\)]*(\([^\(\)]*\))?)+\))?)+)\)/g, '$2');
+
+fs.writeFileSync(syncModulePath, syncModuleSource);
