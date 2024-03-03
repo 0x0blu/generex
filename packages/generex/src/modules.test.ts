@@ -2,7 +2,7 @@ import { readdir } from 'fs/promises';
 import { resolve } from 'path';
 import { describe, expect, test } from 'vitest';
 
-const directories = ['generator', 'transformer', 'collector'];
+const directories = ['producers', 'transformers', 'collectors'];
 
 const modules = (
   await Promise.all(

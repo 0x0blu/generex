@@ -21,7 +21,7 @@ export function preload(count: number) {
       })();
 
       while (true) {
-        const result = queue.popStart() ?? (await queue.waitForPush());
+        const result = await queue.popStartAsync();
         if (result.done) return result.value;
 
         yield result.value;

@@ -1,0 +1,10 @@
+---
+import { GxInteractiveEditor } from '../components/organisms/GxInteractiveEditor';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Astro">
+  <div class="h-screen max-h-screen grid">
+    <GxInteractiveEditor client:load />
+  </div>
+</BaseLayout>

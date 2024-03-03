@@ -21,6 +21,7 @@ export class Deque<T> {
   }
 
   popStart(): T | undefined {
+    if (this.#size === 0) return undefined;
     const value = this.#list[this.#start];
     this.#start = (this.#start + 1) % this.#list.length;
     this.#decremenetSize();
@@ -29,11 +30,30 @@ export class Deque<T> {
   }
 
   popEnd(): T | undefined {
+    if (this.#size === 0) return undefined;
     const index = (this.#start + this.#size - 1) % this.#list.length;
     const value = this.#list[index];
     this.#decremenetSize();
     this.#onPop(value);
     return value;
+  }
+
+  async popStartAsync(): Promise<T> {
+    while (true) {
+      const result = this.popStart();
+      if (result !== undefined) return result;
+
+      await this.waitForPush();
+    }
+  }
+
+  async popEndAsync(): Promise<T> {
+    while (true) {
+      const result = this.popEnd();
+      if (result !== undefined) return result;
+
+      await this.waitForPush();
+    }
   }
 
   waitForPush() {
@@ -71,7 +91,7 @@ export class Deque<T> {
 
   #doubleCapacity() {
     const newCapacity = this.#list.length ? this.#list.length * 2 : 8;
-    const nextList = new Array(newCapacity).fill(null);
+    const nextList = new Array(newCapacity).fill(undefined);
 
     for (let i = 0; i < this.#size; i++) {
       const index = (this.#start + i) % this.#list.length;
