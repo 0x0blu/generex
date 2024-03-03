@@ -15,17 +15,17 @@ const modulesDescriptors = {
 type ModuleName = keyof typeof modulesDescriptors;
 const modulesNames = Object.keys(modulesDescriptors) as ModuleName[];
 
-type FunctionWithParams<R, T extends any[] = any[]> = [(...params: T) => R, T];
-
 interface Props {
   onChangeModules: (modules: Module[]) => void;
 }
 
 export function GxInteractiveEditorCodeEditor({ onChangeModules }: Props) {
-  const [modulesWithParams, setModulesWithParams] = useState<FunctionWithParams<Module>[]>([]);
+  const [modulesWithParams, setModulesWithParams] = useState<[name: ModuleName, (...args: any[]) => Module, any[]][]>(
+    [],
+  );
 
   const modules = useMemo(
-    () => modulesWithParams.map(([constructor, params]) => constructor(...params)),
+    () => modulesWithParams.map(([, constructor, params]) => constructor(...params)),
     [modulesWithParams],
   );
 
@@ -37,7 +37,7 @@ export function GxInteractiveEditorCodeEditor({ onChangeModules }: Props) {
     const moduleName = event.target.value as ModuleName | '';
     if (moduleName) {
       const [constructor, , defaults] = modulesDescriptors[moduleName];
-      setModulesWithParams((prev) => [...prev, [constructor, [...defaults]]]);
+      setModulesWithParams((prev) => [...prev, [moduleName, constructor, [...defaults]]]);
     }
   }, []);
 
@@ -46,7 +46,7 @@ export function GxInteractiveEditorCodeEditor({ onChangeModules }: Props) {
       const value = event.target.value;
       setModulesWithParams((prev) => {
         const next = [...prev];
-        next[moduleIndex]![1][paramIndex] = Number(value);
+        next[moduleIndex]![2][paramIndex] = Number(value);
         return next;
       });
     },
@@ -57,8 +57,7 @@ export function GxInteractiveEditorCodeEditor({ onChangeModules }: Props) {
     <div className="bg-slate-100 flex items-center justify-center">
       <div className="flex flex-col font-mono">
         <div>pipe(</div>
-        {modulesWithParams.map(([constructor], moduleIndex) => {
-          const name = constructor.name as ModuleName;
+        {modulesWithParams.map(([name], moduleIndex) => {
           const types = modulesDescriptors[name][1];
 
           return (
@@ -71,7 +70,7 @@ export function GxInteractiveEditorCodeEditor({ onChangeModules }: Props) {
                     <input
                       type="number"
                       className="w-20"
-                      value={modulesWithParams[moduleIndex]![1][paramIndex]}
+                      value={modulesWithParams[moduleIndex]![2][paramIndex]}
                       onChange={(event) => moduleParamsOnChange(moduleIndex, paramIndex, event)}
                     />
                   ) : (
